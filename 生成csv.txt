@@ -1,0 +1,9 @@
+test = pd.read_csv('/kaggle/input/houkongtest/stock_test_data.csv')
+test[test.columns[~test.columns.isin(['date'])]] = scaler.transform(test[test.columns[~test.columns.isin(['date'])]])
+
+test['close'] = reg.predict(test[test.columns[~test.columns.isin(['date'])]])
+test = test[['date','close']]
+
+test = test.rename(columns={"date": "id"})
+
+test.to_csv('submission.csv', index=False)

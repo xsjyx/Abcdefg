@@ -1,0 +1,37 @@
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestRegressor
+
+# 1. 加载训练数据（假设训练数据包含 'id'）
+train_df = pd.read_csv('/kaggle/input/houkongtest/stock_train_data.csv')
+train_df = train_df.drop(columns=['id'])  # 删除训练数据中的 'id'（如果不需要）
+
+# 2. 训练模型（此处仅展示关键部分，特征工程需自行补充）
+X_train = train_df.drop(columns=['close', 'date'])
+y_train = train_df['close']
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X_train)
+model = RandomForestRegressor().fit(X_scaled, y_train)
+
+# 3. 处理测试数据
+test_df = pd.read_csv('/kaggle/input/houkongtest/stock_test_data.csv')
+
+# 关键修复：直接使用 'date' 作为提交的 'id'，并确保格式正确
+test_features = test_df.drop(columns=['date'])  # 假设测试数据无 'id'，仅删除 'date'
+test_scaled = scaler.transform(test_features)
+
+# 生成提交文件
+submission = pd.DataFrame({
+    'id': test_df['date'],  # 直接使用原始 'date' 列作为 id
+    'close': model.predict(test_scaled)
+})
+
+# 格式化日期为 YYYY-MM-DD
+submission['id'] = pd.to_datetime(submission['id']).dt.strftime('%Y-%m-%d')
+
+# 保存文件（禁用索引）
+submission.to_csv('submission.csv', index=False)
+
+# 验证提交文件前5行
+print("提交文件示例:")
+print(submission.head())

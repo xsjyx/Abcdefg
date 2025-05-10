@@ -1,0 +1,36 @@
+
+import pandas as pd
+from sklearn.neighbors import KNeighborsClassifier
+
+# 1. 加载数据
+train_data = pd.read_csv("/kaggle/input/houkongtest/stock_train_data.csv")  # 训练集
+test_data = pd.read_csv("/kaggle/input/houkongtest/stock_test_data.csv")    # 测试集
+
+# 2. 指定列用途（根据实际数据修改！）
+target_col = "target"          # 替换为你的分类目标列名
+useless_cols = ["id", "date"]  # 指定要删除的无用列名（如ID、日期等）
+used_features = ["feature1", "feature2", "feature3"]  # 指定要使用的特征列名
+
+# 3. 数据清洗（删除无用列）
+# 训练集处理
+X_train = train_data[used_features].values  # 只保留有用特征
+y_train = train_data[target_col].values     # 提取目标列
+
+# 测试集处理（保留ID用于提交，但训练时不使用）
+test_ids = test_data["id"].values           # 假设测试集有id列
+X_test = test_data[used_features].values     # 使用与训练集相同的特征
+
+# 4. 训练模型（KNN分类器）
+model = KNeighborsClassifier(n_neighbors=5)  # 默认使用5个邻居
+model.fit(X_train, y_train)
+
+# 5. 预测并保存结果
+pd.DataFrame({
+    "id": test_ids,
+    "prediction": model.predict(X_test)
+}).to_csv("submit.csv", index=False)
+
+print("结果已保存至 submit.csv")
+print("使用特征:", used_features)
+print("删除列:", useless_cols)
+     

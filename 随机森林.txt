@@ -1,0 +1,41 @@
+ -*- coding: utf-8 -*-
+# 极简随机森林模板
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+
+# 1. 加载数据
+train_data = pd.read_csv('train.csv')
+test_data = pd.read_csv('test.csv')
+
+# 2. 指定列用途（根据实际数据修改！）
+target_col = "label"           # 目标列名（预测值）
+useless_cols = ["id", "date"]  # 要删除的无用列名
+used_features = ["feature1", "feature2", "feature3"]  # 使用的特征列名
+
+# 3. 数据清洗（删除无用列）
+# 训练集处理
+X_train = train_data[used_features].values  # 只保留有用特征
+y_train = train_data[target_col].values     # 提取目标列
+
+# 测试集处理（保留ID用于提交）
+test_ids = test_data["id"].values           # 提取测试集ID
+X_test = test_data[used_features].values    # 使用相同特征
+
+# 4. 训练随机森林模型
+model = RandomForestClassifier(
+    n_estimators=100,      # 树的数量
+    max_depth=5,           # 单棵树最大深度
+    random_state=42,       # 随机种子
+    n_jobs=-1              # 使用所有CPU核心
+)
+model.fit(X_train, y_train)
+
+# 5. 预测并保存结果
+pd.DataFrame({
+    "id": test_ids,
+    "prediction": model.predict(X_test)
+}).to_csv('submission.csv', index=False)
+
+print("预测完成！结果已保存到 submission.csv")
+print("使用的特征列:", used_features)
+print("删除的无用列:", useless_cols)
